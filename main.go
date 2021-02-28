@@ -38,12 +38,22 @@ func main() {
 
 	if debugMode {
 		// TODO: update this string with the full name of your provider as used in your configs
-		err := plugin.Debug(context.Background(), "registry.terraform.io/hashicorp/scaffolding", opts)
+		err := plugin.Debug(context.Background(), "assetspec.com/dev/assetspec", opts)
 		if err != nil {
 			log.Fatal(err.Error())
 		}
 		return
 	}
+
+	// client := httpclient.Client{Token: os.Getenv("ASSETSPEC_TOKEN")}
+	// repo := &repository.DomainRepository{Client: &client}
+
+	// domain, err := repo.GetDomain("callbell.herokuapp.com")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	// log.Printf("%v\n", domain)
 
 	plugin.Serve(opts)
 }

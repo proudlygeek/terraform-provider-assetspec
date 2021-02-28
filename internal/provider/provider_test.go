@@ -13,6 +13,9 @@ var providerFactories = map[string]func() (*schema.Provider, error){
 	"scaffolding": func() (*schema.Provider, error) {
 		return New("dev")(), nil
 	},
+	"assetspec": func() (*schema.Provider, error) {
+		return New("dev")(), nil
+	},
 }
 
 func TestProvider(t *testing.T) {

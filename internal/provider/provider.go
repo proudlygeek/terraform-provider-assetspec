@@ -36,11 +36,11 @@ func New(version string) func() *schema.Provider {
 				},
 			},
 			DataSourcesMap: map[string]*schema.Resource{
-				"scaffolding_data_source": dataSourceScaffolding(),
-				"assetspec_domain":        dataSourceDomain(),
+				"assetspec_domain": dataSourceDomain(),
 			},
 			ResourcesMap: map[string]*schema.Resource{
-				"scaffolding_resource": resourceScaffolding(),
+				// "scaffolding_resource": resourceScaffolding(),
+				"assetspec_domain": resourceDomain(),
 			},
 		}
 

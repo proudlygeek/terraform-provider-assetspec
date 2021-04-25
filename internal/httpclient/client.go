@@ -28,6 +28,7 @@ func NewClient(token string) *Client {
 func (c *Client) DoRequest(req *http.Request) ([]byte, error) {
 	req.Header.Set("Authorization", "Bearer "+c.Token)
 	req.Header.Set("User-Agent", "terraform-provider-assetspec-dev")
+	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "*/*")
 
 	parsedReq, _ := httputil.DumpRequest(req, true)
@@ -44,7 +45,7 @@ func (c *Client) DoRequest(req *http.Request) ([]byte, error) {
 		return nil, err
 	}
 
-	if res.StatusCode != http.StatusOK {
+	if res.StatusCode != http.StatusOK && res.StatusCode != http.StatusCreated {
 		return nil, fmt.Errorf("status: %d, body: %s", res.StatusCode, body)
 	}
 

@@ -7,26 +7,24 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccDataSourceScaffolding(t *testing.T) {
-	t.Skip("data source not yet implemented, remove this once you add your own code")
-
+func TestAccDataSourceDomain(t *testing.T) {
 	resource.UnitTest(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: providerFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceScaffolding,
+				Config: testAccDataSourceDomain,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestMatchResourceAttr(
-						"data.scaffolding_data_source.foo", "sample_attribute", regexp.MustCompile("^ba")),
+						"data.assetspec_domain.example", "id", regexp.MustCompile("^example.com")),
 				),
 			},
 		},
 	})
 }
 
-const testAccDataSourceScaffolding = `
-data "scaffolding_data_source" "foo" {
-  sample_attribute = "bar"
+const testAccDataSourceDomain = `
+data "assetspec_domain" "example" {
+  id = "example.com"
 }
 `

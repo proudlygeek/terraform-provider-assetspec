@@ -39,7 +39,6 @@ func New(version string) func() *schema.Provider {
 				"assetspec_domain": dataSourceDomain(),
 			},
 			ResourcesMap: map[string]*schema.Resource{
-				// "scaffolding_resource": resourceScaffolding(),
 				"assetspec_domain": resourceDomain(),
 			},
 		}

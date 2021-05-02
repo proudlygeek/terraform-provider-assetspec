@@ -26,7 +26,8 @@ func resourceDomain() *schema.Resource {
 			},
 			"check_interval": &schema.Schema{
 				Type:     schema.TypeInt,
-				Computed: true,
+				Optional: true,
+				Default:  1440,
 			},
 			"datetime_lastcheck": &schema.Schema{
 				Type:     schema.TypeString,
@@ -34,7 +35,7 @@ func resourceDomain() *schema.Resource {
 			},
 			"labels": &schema.Schema{
 				Type:     schema.TypeList,
-				Computed: true,
+				Optional: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
@@ -45,7 +46,7 @@ func resourceDomain() *schema.Resource {
 			},
 			"tcp_expect": &schema.Schema{
 				Type:     schema.TypeList,
-				Computed: true,
+				Optional: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeInt,
 				},
@@ -53,26 +54,26 @@ func resourceDomain() *schema.Resource {
 			"webhook_target": &schema.Schema{
 				Type:     schema.TypeString,
 				Computed: true,
-				Optional: true,
 			},
 		},
 	}
 }
 
 func resourceDomainCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	// use the meta value to retrieve your client from the provider configure method
-	// client := meta.(*apiClient)
 	client := meta.(*httpclient.Client)
 
 	var diags diag.Diagnostics
 
-	id := d.Get("fqdn").(string)
 	repo := &repository.DomainRepository{Client: client}
+
+	id := d.Get("fqdn").(string)
+
 	domain := &repository.CreateDomainBody{
 		FQDN:          id,
-		Labels:        make([]string, 0),
-		TCPExpect:     []int{80},
-		CheckInterval: 1440,
+		Labels:        formatLabels(d),
+		TCPExpect:     formatTCPExpect(d),
+		CheckInterval: d.Get("check_interval").(int),
+		WebhookTarget: formatWebhookTarget(d),
 	}
 
 	_, err := repo.CreateDomain(domain)
@@ -117,15 +118,87 @@ func resourceDomainRead(ctx context.Context, d *schema.ResourceData, meta interf
 }
 
 func resourceDomainUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	// use the meta value to retrieve your client from the provider configure method
-	// client := meta.(*apiClient)
+	client := meta.(*httpclient.Client)
 
-	return diag.Errorf("update not implemented")
+	var diags diag.Diagnostics
+
+	repo := &repository.DomainRepository{Client: client}
+
+	id := d.Get("fqdn").(string)
+
+	domain := &repository.UpdateDomainBody{
+		Labels:        formatLabels(d),
+		TCPExpect:     formatTCPExpect(d),
+		CheckInterval: d.Get("check_interval").(int),
+		WebhookTarget: formatWebhookTarget(d),
+	}
+
+	_, err := repo.UpdateDomain(id, domain)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	d.SetId(id)
+
+	resourceDomainRead(ctx, d, meta)
+
+	return diags
 }
 
 func resourceDomainDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	// use the meta value to retrieve your client from the provider configure method
-	// client := meta.(*apiClient)
+	client := meta.(*httpclient.Client)
 
-	return diag.Errorf("delete not implemented")
+	var diags diag.Diagnostics
+
+	repo := &repository.DomainRepository{Client: client}
+
+	id := d.Get("fqdn").(string)
+
+	_, err := repo.DeleteDomain(id)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	d.SetId("")
+
+	return diags
+}
+
+func formatLabels(d *schema.ResourceData) []string {
+	items := d.Get("labels").([]interface{})
+
+	if len(items) == 0 {
+		return make([]string, 0)
+	}
+
+	labels := []string{}
+	for _, item := range items {
+		labels = append(labels, item.(string))
+	}
+
+	return labels
+}
+
+func formatTCPExpect(d *schema.ResourceData) []int {
+	items := d.Get("tcp_expect").([]interface{})
+
+	if len(items) == 0 {
+		return []int{80}
+	}
+
+	tcpExpect := []int{}
+	for _, item := range items {
+		tcpExpect = append(tcpExpect, item.(int))
+	}
+
+	return tcpExpect
+}
+
+func formatWebhookTarget(d *schema.ResourceData) *string {
+	webhookTarget := d.Get("webhook_target").(string)
+	if webhookTarget == "" {
+		webhookTarget = "-"
+	}
+
+	return &webhookTarget
 }

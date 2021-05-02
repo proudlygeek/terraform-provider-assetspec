@@ -4,6 +4,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -29,4 +30,8 @@ func testAccPreCheck(t *testing.T) {
 	if v := os.Getenv("ASSETSPEC_TOKEN"); v == "" {
 		t.Fatal("ASSETSPEC_TOKEN must be set for acceptance tests")
 	}
+}
+
+func generateRandomResourceName() string {
+	return acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
 }
